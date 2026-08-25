@@ -108,6 +108,11 @@ $("todoForm").onsubmit = (e) => { e.preventDefault(); const text = $("todoInput"
 $("todoList").onclick = (e) => { const id = e.target.dataset.id || e.target.dataset.delete; if (!id) return; if (e.target.dataset.delete) data.todos = data.todos.filter(t => t.id !== id); else { const todo = data.todos.find(t => t.id === id); todo.done = !todo.done; } save(); renderTodos(); };
 $("openSettings").onclick = () => { ["focus", "break", "longBreak"].forEach(k => $(k + "Length").value = data.settings[k]); $("roundsUntilLong").value = data.settings.rounds; $("autoStartBreaks").checked = data.settings.auto; $("timerSound").checked = data.settings.sound; $("settingsDialog").showModal(); };
 $("settingsForm").onsubmit = (e) => { if (e.submitter.value !== "save") return; data.settings = { focus: +$("focusLength").value, break: +$("breakLength").value, longBreak: +$("longBreakLength").value, rounds: +$("roundsUntilLong").value, auto: $("autoStartBreaks").checked, sound: $("timerSound").checked }; save(); stop(); selectMode(); };
+document.querySelectorAll(".view-tab").forEach(tab => tab.onclick = () => {
+  document.querySelectorAll(".view-tab").forEach(b => { b.classList.toggle("active", b === tab); b.setAttribute("aria-selected", b === tab); });
+  $("focusView").hidden = tab.dataset.view !== "focus";
+  $("statsView").hidden = tab.dataset.view !== "stats";
+});
 $("themeButton").onclick = () => { data.theme = data.theme === "oled" ? "light" : "oled"; save(); applyTheme(); };
 function applyTheme() { document.body.classList.toggle("oled", data.theme === "oled"); document.querySelector('meta[name="theme-color"]').content = data.theme === "oled" ? "#000000" : "#ffffff"; }
 

@@ -13,30 +13,38 @@
         <a class="wordmark" href="#">focus<span>.</span></a>
         <div class="header-actions"><span id="currentDate"></span><button class="icon-button" id="themeButton" title="Toggle OLED mode" aria-label="Toggle OLED mode">◐</button></div>
       </header>
-      <section class="stats" aria-label="Study statistics">
-        <div class="stat"><span>days studied</span><strong id="daysStudied">0</strong><small>all time</small></div>
-        <div class="stat"><span>total focus</span><strong id="totalTime">0m</strong><small>all time</small></div>
-        <div class="stat"><span>current streak</span><strong id="streak">0</strong><small>days in a row</small></div>
-      </section>
-      <section class="columns">
-        <article class="timer-panel">
-          <div class="panel-head"><p>pomodoro</p><button class="plain-button" id="openSettings">customise</button></div>
-          <div class="mode-tabs" role="tablist"><button class="mode active" data-mode="focus">focus</button><button class="mode" data-mode="break">short break</button><button class="mode" data-mode="longBreak">long break</button></div>
-          <div class="timer" id="timer" aria-live="polite">25:00</div><p class="timer-state" id="timerState">ready when you are</p>
-          <div class="timer-actions"><button class="button" id="timerButton">start</button><button class="icon-button reset" id="resetButton" title="Reset timer" aria-label="Reset timer">↺</button></div>
-          <div class="session-count"><span>sessions today</span><strong id="sessionsToday">0</strong></div>
-        </article>
-        <article class="todo-panel">
-          <div class="panel-head"><p>today</p><span id="todoProgress">0 / 0</span></div>
-          <form id="todoForm"><input id="todoInput" autocomplete="off" maxlength="100" placeholder="add a task and press enter" aria-label="New task" /></form>
-          <ul id="todoList" class="todos"></ul><p class="todo-empty" id="todoEmpty">A clear list makes it easier to begin.</p>
-        </article>
-      </section>
-      <section class="activity-panel">
-        <div class="panel-head"><div><p>study activity</p><span class="muted">the last 12 months</span></div><strong id="activityTotal">0 minutes logged</strong></div>
-        <div class="heatmap-wrap"><div class="weekdays" aria-hidden="true"><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span><span></span></div><div class="heatmap-content"><div class="months" id="months"></div><div class="heatmap" id="heatmap" aria-label="Study activity for the last year"></div></div></div>
-        <div class="legend"><span>less</span><i></i><i></i><i></i><i></i><span>more</span></div>
-      </section>
+      <nav class="view-tabs" role="tablist">
+        <button class="view-tab active" data-view="focus" role="tab" aria-selected="true">focus</button>
+        <button class="view-tab" data-view="stats" role="tab" aria-selected="false">stats</button>
+      </nav>
+      <div class="view" id="focusView">
+        <section class="columns">
+          <article class="timer-panel">
+            <div class="panel-head"><p>pomodoro</p><button class="plain-button" id="openSettings">customise</button></div>
+            <div class="mode-tabs" role="tablist"><button class="mode active" data-mode="focus">focus</button><button class="mode" data-mode="break">short break</button><button class="mode" data-mode="longBreak">long break</button></div>
+            <div class="timer" id="timer" aria-live="polite">25:00</div><p class="timer-state" id="timerState">ready when you are</p>
+            <div class="timer-actions"><button class="button" id="timerButton">start</button><button class="icon-button reset" id="resetButton" title="Reset timer" aria-label="Reset timer">↺</button></div>
+            <div class="session-count"><span>sessions today</span><strong id="sessionsToday">0</strong></div>
+          </article>
+          <article class="todo-panel">
+            <div class="panel-head"><p>today</p><span id="todoProgress">0 / 0</span></div>
+            <form id="todoForm"><input id="todoInput" autocomplete="off" maxlength="100" placeholder="add a task and press enter" aria-label="New task" /></form>
+            <ul id="todoList" class="todos"></ul><p class="todo-empty" id="todoEmpty">A clear list makes it easier to begin.</p>
+          </article>
+        </section>
+      </div>
+      <div class="view" id="statsView" hidden>
+        <section class="stats" aria-label="Study statistics">
+          <div class="stat"><span>days studied</span><strong id="daysStudied">0</strong><small>all time</small></div>
+          <div class="stat"><span>total focus</span><strong id="totalTime">0m</strong><small>all time</small></div>
+          <div class="stat"><span>current streak</span><strong id="streak">0</strong><small>days in a row</small></div>
+        </section>
+        <section class="activity-panel">
+          <div class="panel-head"><div><p>study activity</p><span class="muted">the last 12 months</span></div><strong id="activityTotal">0 minutes logged</strong></div>
+          <div class="heatmap-wrap"><div class="weekdays" aria-hidden="true"><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span><span></span></div><div class="heatmap-content"><div class="months" id="months"></div><div class="heatmap" id="heatmap" aria-label="Study activity for the last year"></div></div></div>
+          <div class="legend"><span>less</span><i></i><i></i><i></i><i></i><span>more</span></div>
+        </section>
+      </div>
     </main>
     <dialog id="settingsDialog"><form method="dialog" id="settingsForm"><button value="cancel" class="close" aria-label="Close">×</button><p>timer settings</p><h1>Make it yours.</h1><div class="settings-grid"><label>focus <input id="focusLength" type="number" min="1" max="240" required /> <span>minutes</span></label><label>short break <input id="breakLength" type="number" min="1" max="120" required /> <span>minutes</span></label><label>long break <input id="longBreakLength" type="number" min="1" max="180" required /> <span>minutes</span></label><label>long break after <input id="roundsUntilLong" type="number" min="1" max="12" required /> <span>focus sessions</span></label></div><label class="toggle"><input id="autoStartBreaks" type="checkbox" /> start breaks automatically</label><label class="toggle"><input id="timerSound" type="checkbox" /> play a chime when a timer ends</label><button class="button" value="save">save changes</button></form></dialog>
     <script src="app.js"></script>
