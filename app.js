@@ -1,9 +1,10 @@
 const KEY = "focus-tracker-v2";
-const blank = { sessions: [], todos: [], theme: "light", settings: { focus: 25, break: 5, longBreak: 15, rounds: 4, auto: false } };
+const blank = { sessions: [], todos: [], theme: "light", settings: { focus: 25, break: 5, longBreak: 15, rounds: 4, auto: false, sound: true } };
 let data = read();
 let mode = "focus";
 let remaining = data.settings.focus * 60;
 let interval = null;
+let audioContext = null;
 const $ = (id) => document.getElementById(id);
 
 function read() {
@@ -65,8 +66,25 @@ function renderTimer() {
 }
 function durationFor(currentMode) { return data.settings[currentMode] * 60; }
 function stop() { clearInterval(interval); interval = null; $("timerButton").textContent = "start"; $("timerState").textContent = "ready when you are"; }
+function playChime() {
+  if (!data.settings.sound) return;
+  try {
+    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioContext.currentTime;
+    [523.25, 659.25].forEach((frequency, index) => {
+      const oscillator = audioContext.createOscillator(), gain = audioContext.createGain();
+      oscillator.type = "sine"; oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0, now + index * 0.16);
+      gain.gain.linearRampToValueAtTime(0.12, now + index * 0.16 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.16 + 0.55);
+      oscillator.connect(gain).connect(audioContext.destination);
+      oscillator.start(now + index * 0.16); oscillator.stop(now + index * 0.16 + 0.56);
+    });
+  } catch { /* The timer still works if this browser blocks audio. */ }
+}
 function finish() {
   stop();
+  playChime();
   if (mode === "focus") {
     data.sessions.unshift({ at: new Date().toISOString(), minutes: data.settings.focus }); save(); renderAll();
     const count = data.sessions.filter(s => localKey(new Date(s.at)) === localKey(new Date())).length;
@@ -75,6 +93,8 @@ function finish() {
 }
 function start() {
   if (interval) { stop(); return; }
+  if (data.settings.sound && !audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext?.state === "suspended") audioContext.resume();
   interval = setInterval(() => { remaining--; renderTimer(); if (remaining <= 0) finish(); }, 1000);
   $("timerButton").textContent = "pause"; $("timerState").textContent = mode === "focus" ? "focus mode is on" : "take a breath";
 }
@@ -86,8 +106,8 @@ $("resetButton").onclick = () => { stop(); selectMode(); };
 document.querySelectorAll(".mode").forEach(b => b.onclick = () => { stop(); mode = b.dataset.mode; selectMode(); });
 $("todoForm").onsubmit = (e) => { e.preventDefault(); const text = $("todoInput").value.trim(); if (!text) return; data.todos.unshift({ id: crypto.randomUUID(), text, done: false }); save(); $("todoInput").value = ""; renderTodos(); };
 $("todoList").onclick = (e) => { const id = e.target.dataset.id || e.target.dataset.delete; if (!id) return; if (e.target.dataset.delete) data.todos = data.todos.filter(t => t.id !== id); else { const todo = data.todos.find(t => t.id === id); todo.done = !todo.done; } save(); renderTodos(); };
-$("openSettings").onclick = () => { ["focus", "break", "longBreak"].forEach(k => $(k + "Length").value = data.settings[k]); $("roundsUntilLong").value = data.settings.rounds; $("autoStartBreaks").checked = data.settings.auto; $("settingsDialog").showModal(); };
-$("settingsForm").onsubmit = (e) => { if (e.submitter.value !== "save") return; data.settings = { focus: +$("focusLength").value, break: +$("breakLength").value, longBreak: +$("longBreakLength").value, rounds: +$("roundsUntilLong").value, auto: $("autoStartBreaks").checked }; save(); stop(); selectMode(); };
+$("openSettings").onclick = () => { ["focus", "break", "longBreak"].forEach(k => $(k + "Length").value = data.settings[k]); $("roundsUntilLong").value = data.settings.rounds; $("autoStartBreaks").checked = data.settings.auto; $("timerSound").checked = data.settings.sound; $("settingsDialog").showModal(); };
+$("settingsForm").onsubmit = (e) => { if (e.submitter.value !== "save") return; data.settings = { focus: +$("focusLength").value, break: +$("breakLength").value, longBreak: +$("longBreakLength").value, rounds: +$("roundsUntilLong").value, auto: $("autoStartBreaks").checked, sound: $("timerSound").checked }; save(); stop(); selectMode(); };
 $("themeButton").onclick = () => { data.theme = data.theme === "oled" ? "light" : "oled"; save(); applyTheme(); };
 function applyTheme() { document.body.classList.toggle("oled", data.theme === "oled"); document.querySelector('meta[name="theme-color"]').content = data.theme === "oled" ? "#000000" : "#ffffff"; }
 
